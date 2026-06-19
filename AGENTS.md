@@ -307,12 +307,19 @@ CREATE TABLE biz_order (
 
 数据库变更必须同步更新 SQL 脚本，添加日期注释：
 
+- 新增、修改、删除字段/表/索引/菜单数据等数据库变更，必须在 SQL 文件末尾追加新的变更语句。
+- 已提交、已发布或已被环境执行过的 SQL，不得通过修改历史 `CREATE TABLE`、`INSERT` 或 `ALTER` 语句来表达新的变更。
+- 尚未提交且从未执行的新脚本，可在本地开发阶段修正后再提交。
+
 ```sql
 -- 2026-05-17 新增订单表
 CREATE TABLE biz_order (...);
 
 -- 2026-05-17 给订单表新增状态字段
 ALTER TABLE biz_order ADD COLUMN status INT DEFAULT 0 COMMENT '订单状态';
+
+-- 2026-06-20 删除订单表状态字段，必须追加在文件末尾，不能回改历史建表语句
+ALTER TABLE biz_order DROP COLUMN status;
 ```
 
 #### 菜单配置
