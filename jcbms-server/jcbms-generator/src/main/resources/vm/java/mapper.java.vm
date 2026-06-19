@@ -1,0 +1,55 @@
+package ${packageName}.mapper;
+
+#if($table.sub)
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
+#end
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import ${packageName}.domain.${ClassName};
+#if($table.sub)
+import ${packageName}.domain.${subClassName};
+#end
+
+/**
+ * ${functionName}Mapper接口
+ * 
+ * @author ${author}
+ * @date ${datetime}
+ */
+public interface ${ClassName}Mapper extends BaseMapper<${ClassName}>
+{
+#if($table.sub)
+    /**
+     * 查询${subTable.functionName}列表
+     * 
+     * @param ${subTableFkclassName} ${functionName}主键
+     * @return ${subTable.functionName}集合
+     */
+    public List<${subClassName}> select${subClassName}ListBy${subTableFkClassName}(@Param("${subTableFkclassName}") ${pkColumn.javaType} ${subTableFkclassName});
+
+    /**
+     * 批量删除${subTable.functionName}
+     * 
+     * @param ${subTableFkclassName}s 需要删除的数据主键集合
+     * @return 结果
+     */
+    public int delete${subClassName}By${subTableFkClassName}s(@Param("${subTableFkclassName}s") ${pkColumn.javaType}[] ${subTableFkclassName}s);
+    
+    /**
+     * 批量新增${subTable.functionName}
+     * 
+     * @param ${subclassName}List ${subTable.functionName}列表
+     * @return 结果
+     */
+    public int batch${subClassName}(@Param("list") List<${subClassName}> ${subclassName}List);
+    
+
+    /**
+     * 通过${functionName}主键删除${subTable.functionName}信息
+     * 
+     * @param ${subTableFkclassName} ${functionName}ID
+     * @return 结果
+     */
+    public int delete${subClassName}By${subTableFkClassName}(@Param("${subTableFkclassName}") ${pkColumn.javaType} ${subTableFkclassName});
+#end
+}

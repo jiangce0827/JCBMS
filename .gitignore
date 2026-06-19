@@ -1,0 +1,40 @@
+# Operating system
+.DS_Store
+Thumbs.db
+
+# IDE and editor
+.idea/
+.vscode/
+*.iml
+
+# Environment and local config
+.env
+.env.*
+!.env.example
+!.env.*.example
+application-local.yml
+application-*.local.yml
+
+# Logs
+*.log
+logs/
+
+# Java / Maven
+target/
+*.class
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+
+# Runtime uploads and temporary files
+uploadPath/
+profile/
+temp/
+tmp/
+
+# Archives and generated packages
+*.zip
+*.tar
+*.tar.gz

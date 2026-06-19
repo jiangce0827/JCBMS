@@ -1,0 +1,221 @@
+package ${packageName}.service.impl;
+
+#if($table.sub)
+import java.util.Arrays;
+#end
+import java.util.List;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+#foreach ($column in $columns)
+#if($column.javaField == 'createTime' || $column.javaField == 'updateTime')
+import com.jiangce.jcbms.common.utils.DateUtils;
+#break
+#end
+#end
+import com.jiangce.jcbms.common.utils.StringUtils;
+import org.springframework.stereotype.Service;
+#if($table.sub)
+import org.springframework.transaction.annotation.Transactional;
+import ${packageName}.domain.${subClassName};
+#end
+import ${packageName}.mapper.${ClassName}Mapper;
+import ${packageName}.domain.${ClassName};
+import ${packageName}.service.I${ClassName}Service;
+
+/**
+ * ${functionName}Service业务层处理
+ * 
+ * @author ${author}
+ * @date ${datetime}
+ */
+@Service
+public class ${ClassName}ServiceImpl extends ServiceImpl<${ClassName}Mapper, ${ClassName}> implements I${ClassName}Service
+{
+    /**
+     * 查询${functionName}列表
+     * 
+     * @param ${className} ${functionName}
+     * @return ${functionName}
+     */
+    @Override
+    public List<${ClassName}> select${ClassName}List(${ClassName} ${className})
+    {
+        return list(buildQueryWrapper(${className}));
+    }
+
+#if($table.sub)
+    /**
+     * 查询${functionName}详细信息
+     * 
+     * @param ${pkColumn.javaField} ${functionName}主键
+     * @return ${functionName}
+     */
+    @Override
+    public ${ClassName} select${ClassName}By${pkColumn.capJavaField}(${pkColumn.javaType} ${pkColumn.javaField})
+    {
+        ${ClassName} ${className} = getById(${pkColumn.javaField});
+        if (StringUtils.isNotNull(${className}))
+        {
+            ${className}.set${subClassName}List(baseMapper.select${subClassName}ListBy${subTableFkClassName}(${pkColumn.javaField}));
+        }
+        return ${className};
+    }
+
+    /**
+     * 新增${functionName}
+     * 
+     * @param ${className} ${functionName}
+     * @return 结果
+     */
+    @Transactional
+    @Override
+    public boolean save${ClassName}(${ClassName} ${className})
+    {
+        boolean result = save(${className});
+        if (result)
+        {
+            insert${subClassName}(${className});
+        }
+        return result;
+    }
+
+    /**
+     * 修改${functionName}
+     * 
+     * @param ${className} ${functionName}
+     * @return 结果
+     */
+    @Transactional
+    @Override
+    public boolean update${ClassName}ById(${ClassName} ${className})
+    {
+        boolean result = updateById(${className});
+        if (result)
+        {
+            baseMapper.delete${subClassName}By${subTableFkClassName}(${className}.get${pkColumn.capJavaField}());
+            insert${subClassName}(${className});
+        }
+        return result;
+    }
+
+    /**
+     * 批量删除${functionName}
+     * 
+     * @param ${pkColumn.javaField}s 需要删除的${functionName}主键
+     * @return 结果
+     */
+    @Transactional
+    @Override
+    public boolean remove${ClassName}ByIds(${pkColumn.javaType}[] ${pkColumn.javaField}s)
+    {
+        baseMapper.delete${subClassName}By${subTableFkClassName}s(${pkColumn.javaField}s);
+        return removeByIds(Arrays.asList(${pkColumn.javaField}s));
+    }
+
+#end
+    /**
+     * 新增${functionName}
+     *
+     * @param entity ${functionName}
+     * @return 结果
+     */
+    @Override
+    public boolean save(${ClassName} entity)
+    {
+#foreach ($column in $columns)
+#if($column.javaField == 'createTime')
+        entity.setCreateTime(DateUtils.getNowDate());
+#end
+#end
+        return super.save(entity);
+    }
+
+    /**
+     * 修改${functionName}
+     *
+     * @param entity ${functionName}
+     * @return 结果
+     */
+    @Override
+    public boolean updateById(${ClassName} entity)
+    {
+#foreach ($column in $columns)
+#if($column.javaField == 'updateTime')
+        entity.setUpdateTime(DateUtils.getNowDate());
+#end
+#end
+        return super.updateById(entity);
+    }
+
+    /**
+     * 构建${functionName}查询条件
+     */
+    private LambdaQueryWrapper<${ClassName}> buildQueryWrapper(${ClassName} ${className})
+    {
+        LambdaQueryWrapper<${ClassName}> queryWrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNull(${className}))
+        {
+            return queryWrapper;
+        }
+#foreach($column in $columns)
+#set($queryType=$column.queryType)
+#set($javaField=$column.javaField)
+#set($javaType=$column.javaType)
+#if($javaField.length() > 2 && $javaField.substring(1,2).matches("[A-Z]"))
+#set($AttrName=$javaField)
+#else
+#set($AttrName=$javaField.substring(0,1).toUpperCase() + ${javaField.substring(1)})
+#end
+#if($column.query)
+#if($queryType == "EQ")
+        queryWrapper.eq(#if($javaType == 'String')StringUtils.isNotEmpty(${className}.get${AttrName}())#else StringUtils.isNotNull(${className}.get${AttrName}())#end, ${ClassName}::get${AttrName}, ${className}.get${AttrName}());
+#elseif($queryType == "NE")
+        queryWrapper.ne(#if($javaType == 'String')StringUtils.isNotEmpty(${className}.get${AttrName}())#else StringUtils.isNotNull(${className}.get${AttrName}())#end, ${ClassName}::get${AttrName}, ${className}.get${AttrName}());
+#elseif($queryType == "GT")
+        queryWrapper.gt(#if($javaType == 'String')StringUtils.isNotEmpty(${className}.get${AttrName}())#else StringUtils.isNotNull(${className}.get${AttrName}())#end, ${ClassName}::get${AttrName}, ${className}.get${AttrName}());
+#elseif($queryType == "GTE")
+        queryWrapper.ge(#if($javaType == 'String')StringUtils.isNotEmpty(${className}.get${AttrName}())#else StringUtils.isNotNull(${className}.get${AttrName}())#end, ${ClassName}::get${AttrName}, ${className}.get${AttrName}());
+#elseif($queryType == "LT")
+        queryWrapper.lt(#if($javaType == 'String')StringUtils.isNotEmpty(${className}.get${AttrName}())#else StringUtils.isNotNull(${className}.get${AttrName}())#end, ${ClassName}::get${AttrName}, ${className}.get${AttrName}());
+#elseif($queryType == "LTE")
+        queryWrapper.le(#if($javaType == 'String')StringUtils.isNotEmpty(${className}.get${AttrName}())#else StringUtils.isNotNull(${className}.get${AttrName}())#end, ${ClassName}::get${AttrName}, ${className}.get${AttrName}());
+#elseif($queryType == "LIKE")
+        queryWrapper.like(#if($javaType == 'String')StringUtils.isNotEmpty(${className}.get${AttrName}())#else StringUtils.isNotNull(${className}.get${AttrName}())#end, ${ClassName}::get${AttrName}, ${className}.get${AttrName}());
+#elseif($queryType == "BETWEEN")
+        queryWrapper.between(hasParam(${className}, "begin${AttrName}") && hasParam(${className}, "end${AttrName}"), ${ClassName}::get${AttrName}, ${className}.getParams().get("begin${AttrName}"), ${className}.getParams().get("end${AttrName}"));
+#end
+#end
+#end
+        return queryWrapper;
+    }
+
+    /**
+     * 判断范围查询参数是否有效
+     */
+    private boolean hasParam(${ClassName} ${className}, String key)
+    {
+        Object value = ${className}.getParams().get(key);
+        return StringUtils.isNotNull(value) && StringUtils.isNotEmpty(value.toString());
+    }
+#if($table.sub)
+
+    /**
+     * 新增${subTable.functionName}信息
+     * 
+     * @param ${className} ${functionName}对象
+     */
+    private void insert${subClassName}(${ClassName} ${className})
+    {
+        List<${subClassName}> ${subclassName}List = ${className}.get${subClassName}List();
+        ${pkColumn.javaType} ${pkColumn.javaField} = ${className}.get${pkColumn.capJavaField}();
+        if (StringUtils.isNotEmpty(${subclassName}List))
+        {
+            for (${subClassName} ${subclassName} : ${subclassName}List)
+            {
+                ${subclassName}.set${subTableFkClassName}(${pkColumn.javaField});
+            }
+            baseMapper.batch${subClassName}(${subclassName}List);
+        }
+    }
+#end
+}
